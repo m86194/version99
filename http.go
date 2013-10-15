@@ -92,18 +92,18 @@ func init() {
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
-		writeStatus(http.StatusBadRequest, w, r)
+		sendStatus(http.StatusBadRequest, w, r)
 		return
 	}
 
 	if r.RequestURI == "/" || r.RequestURI == "/index.html" {
-		writeData([]byte(INDEX_HTML), "text/html", w, r)
+		sendOK([]byte(INDEX_HTML), "text/html", w, r)
 		return
 	}
 
 	m := matchMavenURI(r.RequestURI)
 	if m == nil {
-		writeNotFound(w, r)
+		sendNotFound(w, r)
 		return
 	}
 
@@ -111,30 +111,30 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	case "jar":
 		switch m.Digest {
 		case "":
-			writeData(emptyJar, "application/jar", w, r)
+			sendOK(emptyJar, "application/jar", w, r)
 			return
 		case "sha1", "md5":
-			writeDigest(emptyJar, m.Digest, w, r)
+			sendDigest(emptyJar, m.Digest, w, r)
 			return
 		}
 	case "pom":
 		var buf bytes.Buffer
 		err := pomTemplate.Execute(&buf, m)
 		if err != nil {
-			writeError(err, w, r)
+			sendError(err, w, r)
 			return
 		}
 
 		switch m.Digest {
 		case "":
-			writeData(buf.Bytes(), "text/xml", w, r)
+			sendOK(buf.Bytes(), "text/xml", w, r)
 			return
 		case "sha1", "md5":
-			writeDigest(buf.Bytes(), m.Digest, w, r)
+			sendDigest(buf.Bytes(), m.Digest, w, r)
 			return
 		}
 	}
 
-	writeNotFound(w, r)
+	sendNotFound(w, r)
 }
 

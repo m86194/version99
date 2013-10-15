@@ -62,15 +62,22 @@ func makeDigest(data []byte, digest string) (string, error) {
 
 // --------------------------------------------------------------------
 
-func writeData(data []byte, contentType string, w http.ResponseWriter, r *http.Request) {
+func send(data []byte, contentType string, status int, w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(status)
 	w.Header().Set("Content-Type", contentType)
 	w.Write(data)
-	logRequest(http.StatusOK, r)
+	logRequest(status, r)
 }
 
 // --------------------------------------------------------------------
 
-func writeDigest(data []byte, digest string, w http.ResponseWriter, r *http.Request) {
+func sendOK(data []byte, contentType string, w http.ResponseWriter, r *http.Request) {
+	send(data, contentType, http.StatusOK, w, r)
+}
+
+// --------------------------------------------------------------------
+
+func sendDigest(data []byte, digest string, w http.ResponseWriter, r *http.Request) {
 	d, err := makeDigest(data, digest)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -78,34 +85,32 @@ func writeDigest(data []byte, digest string, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	writeData([]byte(d), "text/plain", w, r)
+	sendOK([]byte(d), "text/plain", w, r)
 }
 
 // --------------------------------------------------------------------
 
-func writeError(err error, w http.ResponseWriter, r *http.Request) {
-	writeStatus(http.StatusInternalServerError, w, r)
+func sendError(err error, w http.ResponseWriter, r *http.Request) {
 	log.Print(err)
+	sendStatus(http.StatusInternalServerError, w, r)
 }
 
 // --------------------------------------------------------------------
 
-func writeNotFound(w http.ResponseWriter, r *http.Request) {
+func sendNotFound(w http.ResponseWriter, r *http.Request) {
 	var buf bytes.Buffer
 	err := notFoundTemplate.Execute(&buf, &notFound{URL: r.RequestURI, InfoURL: INFO_URL})
 	if err != nil {
-		writeError(err, w, r)
+		sendError(err, w, r)
 		return
 	}
 
-	w.WriteHeader(http.StatusNotFound)
-	w.Header().Set("Content-Type", "text/html")
-	w.Write(buf.Bytes())
+	send(buf.Bytes(), "text/html", http.StatusNotFound, w, r)
 }
 
 // --------------------------------------------------------------------
 
-func writeStatus(status int, w http.ResponseWriter, r *http.Request) {
+func sendStatus(status int, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(status)
 	logRequest(status, r)
 }
