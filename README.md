@@ -12,4 +12,4 @@ The original Ruby/Camping application was ported to Go by my colleague Frank Sch
 
 Build it as follows:
 
-    go build -o version99 main.go http.go helper.go
+    go build
