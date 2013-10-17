@@ -2,15 +2,14 @@ package main
 
 import (
 	"bytes"
-	"encoding/base64"
-	"log"
 	"net/http"
 	"text/template"
 )
 
 const (
-	INFO_URL  = "http://day-to-day-stuff.blogspot.com/2007/10/announcement-version-99-does-not-exist.html"
-	EMPTY_JAR = "UEsDBAoAAAAAAME+SDiyfwLuGQAAABkAAAAUAAQATUVUQS1JTkYvTUFOSUZFU1QuTUb+ygAATWFuaWZlc3QtVmVyc2lvbjogMS4wDQoNClBLAQIKAAoAAAAAAME+SDiyfwLuGQAAABkAAAAUAAQAAAAAAAAAAAAAAAAAAABNRVRBLUlORi9NQU5JRkVTVC5NRv7KAABQSwUGAAAAAAEAAQBGAAAATwAAAAAA"
+	INFO_URL    = "http://day-to-day-stuff.blogspot.com/2007/10/announcement-version-99-does-not-exist.html"
+	FAVICON_ICO = "AAABAAEAEBAQAAAAAAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAD/AAAA////AAAA/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEREQERERAAAAARAAABEAAREREBEREQABEAEQEQARAAERERAREREAAAAAAAAAAAAAAAAAAAAAACIiIiIiIiIiIiIiIiIiIiIiIiIhEiIiIiIiIhERIiIiIiIhEiESIiIiIiESIRIiIiIiIiIiIiIiIiIiIiIiIiIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+	EMPTY_JAR   = "UEsDBAoAAAAAAME+SDiyfwLuGQAAABkAAAAUAAQATUVUQS1JTkYvTUFOSUZFU1QuTUb+ygAATWFuaWZlc3QtVmVyc2lvbjogMS4wDQoNClBLAQIKAAoAAAAAAME+SDiyfwLuGQAAABkAAAAUAAQAAAAAAAAAAAAAAAAAAABNRVRBLUlORi9NQU5JRkVTVC5NRv7KAABQSwUGAAAAAAEAAQBGAAAATwAAAAAA"
 
 	POM_XML = `<?xml version="1.0" encoding="iso-8859-1"?>
 <project>
@@ -74,19 +73,9 @@ type maven struct {
 var (
 	notFoundTemplate = template.Must(template.New("notFound").Parse(NOT_FOUND_HTML))
 	pomTemplate      = template.Must(template.New("pom").Parse(POM_XML))
-	emptyJar         []byte
+	emptyJar         = mustBase64Decode(EMPTY_JAR)
+	favicon          = mustBase64Decode(FAVICON_ICO)
 )
-
-// --------------------------------------------------------------------
-
-func init() {
-	var err error
-
-	emptyJar, err = base64.StdEncoding.DecodeString(EMPTY_JAR)
-	if err != nil {
-		log.Fatalf("Error decoding empty jar. %v", err)
-	}
-}
 
 // --------------------------------------------------------------------
 
@@ -98,6 +87,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	if r.RequestURI == "/" || r.RequestURI == "/index.html" {
 		sendOK([]byte(INDEX_HTML), "text/html", w, r)
+		return
+	}
+
+	if r.RequestURI == "/favicon.ico" {
+		sendOK(favicon, "image/x-icon", w, r)
 		return
 	}
 
@@ -137,4 +131,3 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	sendNotFound(w, r)
 }
-

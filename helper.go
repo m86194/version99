@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	"crypto/sha1"
+	"encoding/base64"
 	"fmt"
 	"hash"
 	"log"
@@ -58,6 +59,16 @@ func makeDigest(data []byte, digest string) (string, error) {
 	}
 
 	return fmt.Sprintf("%x", h.Sum(nil)), nil
+}
+
+// --------------------------------------------------------------------
+
+func mustBase64Decode(s string) []byte {
+	buf, err := base64.StdEncoding.DecodeString(s)
+	if err != nil {
+		panic(err)
+	}
+	return buf
 }
 
 // --------------------------------------------------------------------
