@@ -80,8 +80,7 @@ func sendOK(data []byte, contentType string, w http.ResponseWriter, r *http.Requ
 func sendDigest(data []byte, digest string, w http.ResponseWriter, r *http.Request) {
 	d, err := makeDigest(data, digest)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		logRequest(http.StatusInternalServerError, r)
+		sendError(err, w, r)
 		return
 	}
 
