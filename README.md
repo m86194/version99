@@ -10,8 +10,16 @@ For example the following links will give an [empty jar](http://version99.grons.
 
 The original Ruby/Camping application was ported to Go by my colleague Frank Schroeders.
 
-Build it as follows:
+Build it natively as follows:
 
     go build
+    
+Build and run it in a modern Docker as follows (tested on Windows 10):
+
+    docker build -t version99:latest .
+    docker run -it --rm -p 8080:8080 version99:latest
+
+TODO:  Add settings.xml snippet.
+
 
 This service is running on http://version99.grons.nl. However, I encourage you to run this service yourself as bandwidth to my machine is limited.
